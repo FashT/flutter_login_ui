@@ -2,8 +2,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_ui/homepage.dart';
 
 import 'login_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 Gradient gradientTry = const LinearGradient(
@@ -25,6 +27,21 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+
+
+
+  bool isFirstTimeUser = true;
+
+ 
+
+  Future<void> checkFirstTimeUser() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isFirstTimeUser = prefs.getBool('isFirstTimeUser') ?? true;
+    });
+  }
+
+
   @override
   void initState() {
     super.initState();
@@ -32,7 +49,7 @@ class _SplashScreenState extends State<SplashScreen> {
       const Duration(seconds: 5),
       () => Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => LoginPage(),
+          builder: (context) => isFirstTimeUser? const HomePage():LoginPage(),
         ),
       ),
     );

@@ -1,8 +1,8 @@
 // lib/screens/login_page.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
-
+import 'package:flutter_ui/homepage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'button.dart';
 import 'register_page.dart';
@@ -19,7 +19,6 @@ Gradient gradientTry = const LinearGradient(
   ],
   // begin: Alignment.topCenter,
   // end: Alignment.bottomRight,
-  
 );
 
 class LoginPage extends StatefulWidget {
@@ -30,35 +29,59 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+
+  late final SharedPreferences sharedPreferences;
+
   final emailController = TextEditingController();
 
   final passwordController = TextEditingController();
 
   final confirmdController = TextEditingController();
 
-  void signIn() async {
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      },
-    );
 
+
+void saveInput() async{
+sharedPreferences = await SharedPreferences.getInstance();
+}
+
+
+void signIn() async{
+User? currentUser;
     try {
-      FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: emailController.text,
-        password: passwordController.text,
-      );
-      Navigator.pop(context);
-    } on FirebaseAuthException catch (e) {
-      //pop the loading circle
-      Navigator.pop(context);
-      //Wrong Email
-      showErrorMessage(e.code);
+      await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      )
+          .then((auth) {
+        currentUser = auth.user;
+      }).catchError((error) {
+        showErrorMessage(error);
+      });
+      if (currentUser != null) {
+        if (!mounted) return;
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const HomePage(),
+            ));
+
+  
+      }
+    } catch (e) {
+      if (e is FirebaseAuthException) {
+
+
+        print("Firebase Authentication Error: ${e.message}");
+      } else {
+        print("Error: $e");
+        showErrorMessage("Incorrect Email or Password");
+    
+      }
     }
-  }
+
+}
+
 
   void showErrorMessage(String message) {
     showDialog(
@@ -88,7 +111,7 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: const Color(0xffb33d7e),
       body: Container(
         height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width,
+        width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(gradient: gradientTry),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -107,14 +130,17 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       obsecureText: false,
                       hintText: 'Email',
+                      controller: emailController,
                     ),
                     MyTextField(
-                        icon: const Icon(
-                          Icons.lock,
-                          color: Color(0xfff9f6f8),
-                        ),
-                        obsecureText: true,
-                        hintText: 'Password'),
+                      icon: const Icon(
+                        Icons.lock,
+                        color: Color(0xfff9f6f8),
+                      ),
+                      obsecureText: true,
+                      hintText: 'Password',
+                      controller: passwordController,
+                    ),
                     const SizedBox(
                       height: 6,
                     ),

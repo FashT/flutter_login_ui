@@ -1,8 +1,11 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_ui/firebase_options.dart';
+import 'package:flutter_ui/homepage.dart';
+import 'package:flutter_ui/register_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_page.dart';
+import 'login_page.dart';
 import 'splash.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -43,8 +46,11 @@ class _MyAppState extends State<MyApp> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       isFirstTimeUser = prefs.getBool('isFirstTimeUser') ?? true;
+  
     });
   }
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -52,9 +58,7 @@ class _MyAppState extends State<MyApp> {
       title: 'Flutter App',
       home:
       isFirstTimeUser? 
-    SplashScreen():
-       const AuthPage()
-      // isFirstTimeUser ? SplashScreen() : LoginPage(),
+    SplashScreen(): const AuthPage()
     );
   }
 }
